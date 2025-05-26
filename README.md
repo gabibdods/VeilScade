@@ -77,9 +77,9 @@ In modern networks, latency and security are major concerns. I wanted to:
 
 ---
 
-## 📸 Diagram (Optional)
+## 📸 Diagram
 
-*Add a diagram of the architecture if available (e.g., client → Squid → DANTE → SSH tunnel → Internet)*
+The HTTP Request traverses the following path: client → Squid → DANTE → SSH tunnel → Internet
 
 ---
 
