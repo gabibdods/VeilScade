@@ -1,0 +1,138 @@
+bash: sudo apt update && sudo apt upgrade -y
+      updates : updates the list of available packages and their version, but it does not install or upgrade any packages.
+      upgrade : installs the newest version in the list of available packages installed, while logging the installed newest version of packages to the package manager
+      -y : yes to install package that take ??? XB.
+  
+bash: sudo apt intall squid
+      to install squid service
+
+bash: sudo cp /etc/squid/squid.conf /etc/squid/squid.conf.original
+      creates a copy of the default settings, in the case of a rollback or of a hard reset, it is uncareful to modify original files
+      other extension : .conf.bkup | .conf.default
+  
+bash: sudo apt install apache2-utils
+      to install utiities from the Apache project to use a password generator recognizable by Squid
+  
+bash: sudo nano /etc/squid/squid.conf
+      use nano to modify configurations of the proxy server
+	  if I had to redo this project, use vim to start practicing
+
+nano: /etc/squid/squid.conf:
+	  http_port <custom_http_port>
+		port 3124 is the default port for Squid, port 8888 is conventional for proxy servers, however other ports are available; BE SURE to not connect to a port already being used by another service
+
+	  cache_dir ufs /var/spool/squid 1000 16 256
+		natively Squid used memory as cache, so it is preferable to specify the cache to be a directory on the storage
+		storage format: ufs (Universal Flash Storage : higher data transfer speed and increased reliability) | afs (Andrew FileSystem: present a homogeneous, location-transparent file name space to all the client workstations)
+		first number: allocated space in MB for proxy cache (to store previously visited websites for faster traffic)
+		second number: number of level-1 subdirectories created in the cache directory
+		third number: number of level-2 subdirectories created in the cache directory (level-2 directories are created in level-1 directories)
+
+	  auth_param basic program /usr/lib/squid/basic_ncsa_auth /etc/squid/passwords
+		uses NCSA authenticator to authenticate
+		usernames and encrypted passwords are stored in /etc/squid/passwords
+
+	  auth param basic program realm proxy
+		specifies the protection scope to be reported to the client for the authentification scheme
+
+	  auth_param basic credentialsttl 24 hours
+		Time-To-Live until the credentials (the token) expires and needs to be renewed
+
+	  auth_param basic casesensitive off
+		case sensitivity turned off for user, can be turned on for more security
+
+	  acl authenticated proxy_auth REQUIRED
+		set up for authentication scheme
+
+	  acl <client_name> src <client_IPv4>/24
+		grant access control to client for source outbound connections from <client_IPv4>/24
+
+	  http_access deny !authenticated
+		deny http to users who are not authenticated
+
+	  http_access allow authenticated
+		allow access to user who are authenticated, which should prompt a login pop-up on the client
+
+	  http_access allow <proxy_host_name>
+		allow http to <proxy_host_name>
+
+	  cache_peer 127.0.0.1 parent <other_server_host_port> 0 no-query no-dig default
+		ensure that the proxy servers sends the output connection to the another server
+
+	  http_access deny all
+		deny http to everyone else
+		
+	  forwarded_for delete
+		remove the forwarded_for http header which exposes the source to the destination (the client to the host)
+	  
+bash: sudo touch /etc/squid/passwords
+		to create /etc/squid/passwords with root permissions
+
+bash: sudo htpasswd -c /etc/squid/passwords <username>
+		type password for <username> (it is normal for the terminal to not print "*" when typing passwords, for real-life security reasons)
+
+an alternative is to use sudo chmod 777 /etc/squid/passwords, but it is NOT TO BE USED in a large scale system, as it is bad practice and should only be used to bypass inconvenient permission issues for i.e. testing purposes
+
+bash: sudo cat /etc/squid/passwords
+		prints <username> : <encrypted password>, there can only be one user
+
+bash: sudo systemctl enable squid.service
+		allows squid to start on start-up
+
+bash: sudo ufw allow <custom_http_port>	
+		tells Uncomplicated FireWall on Ubuntu systems to allow incoming connections from <custom_http_port>
+
+bash: sudo systemctl restart squid.service
+	tells systemd to reboot Squid
+	ALWAYS IMPORTANT to restart (reboot) a server to apply changes, especially configuration changes
+
+
+bash: systemctl status squid.service
+		to verify the status of squid, for debugging purposes
+	
+bash: sudo less /var/log/squid/access.log
+	  access the connection logs
+		cache hit code :	TCP_HIT			: request was served from cache and not original server
+							TCP_TUNNEL		: request is being served bypassing firewall restrictions (TCP endpoint)
+							TCP_MISS		: request could not be served from cache, it was forwarded to original server
+							TCP_EXPIRED		: request was served with a resource from cache, but the resource is expired, so a new request is sent to original server for an updated resource
+							TCP_UPDATING	: continuation of TCP_EXPIRED; the request for an updated resource is being fetched from the original server to update cache
+							TCP_DENIED		: request denied (check login info from client and connection from host)
+
+bash: curl -v -x http://<username>:<password>@<host_IPv4>:<custom_http_port> https://duckduckgo.com/
+		to simulate a request from an allowed ACL to duckduckgo.com, for debugging purposes
+
+bash: sudo ufw status verbose
+		to see all allowed and denied ports in FireWall, for debugging purposes
+	  
+	  
+	  
+	  
+	  
+Dante SOCKS:
+
+. sudo apt update
+
+. sudo apt install dante-server
+
+. sudo rm /etc/danted.conf
+  you will rewrite the configuration files, as it is easier than modify each value one by one
+  
+. sudo nano /etc/danted.conf
+  write your prefered configurations in here, see official documental for minimum configurations for the server to at least start
+	
+. sudo ufw allow 1080
+
+. sudo useradd -r -s /bin/false your_dante_user
+
+. sudo passwd your_dante_user
+
+. sudo systemctl restart danted.service
+
+debugging commands:
+
+. systemctl status danted.service
+
+. curl -v -x socks5://your_dante_user:your_dante_password@your_server_ip:1080 http://www.google.com/
+
+. sudo ufw status verbose
