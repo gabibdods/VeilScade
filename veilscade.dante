@@ -1,0 +1,18 @@
+logoutput: syslog
+
+internal: 127.0.0.1 port = 1080
+external: 127.0.0.1
+
+socksmethod: username none
+user.notprivileged: nobody
+
+client pass {
+    from: 127.0.0.1/32 to: 0.0.0.0/0
+    log: connect disconnect error
+}
+
+socks pass {
+    from: 127.0.0.1/32 to: 0.0.0.0/0
+    command: connect udpassociate bind
+    log: connect disconnect error
+}
