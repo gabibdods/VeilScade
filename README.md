@@ -1,6 +1,6 @@
 # 🛡️ Encrypted SOCKS Proxy Server with Caching
 
-A custom-configured proxy server built on Linux Ubuntu using Squid-Proxy and DANTE-SOCKS, enhanced with SSH tunneling for encrypted communication. This setup enables secure and accelerated HTTP requests through content caching and SOCKS protocol encapsulation.
+A custom-configured proxy server built on Ubuntu Server OS using **Squid-Proxy**, **Redsocks**, **Dante-SOCKS**, **Shadowsocks**, and **Fail2Ban**. This layered architecture enables secure and accelerated HTTP requests through content caching, SOCKS protocol forwarding, encryption, and intrusion prevention.
 
 ---
 
@@ -17,7 +17,7 @@ In modern networks, latency and security are major concerns. I wanted to:
 
 - Build a proxy server with both **caching** and **encryption**
 - Enable encrypted communication over the **SOCKS protocol**
-- Ensure seamless service integration between Squid-Proxy, DANTE-SOCKS, and SSH
+- Ensure seamless service integration between **Squid-Proxy**, **Dante-SOCKS**, and **Shadowsocks**
 - Understand how different layers of a secure network proxy system interconnect
 - Improve practical knowledge in **LAN/WLAN engineering and maintenance**
 
@@ -25,68 +25,75 @@ In modern networks, latency and security are major concerns. I wanted to:
 
 ## 🛠️ Technologies Used
 
-- **OS:** Ubuntu Linux  
-- **Proxy Service:** Squid-Proxy  
-- **SOCKS Support:** DANTE-SOCKS  
-- **Encryption Layer:** stunnel (for SSH tunneling over SOCKS)  
-- **Client Communication:** Standard web client > proxy chain  
+- **OS:** Ubuntu Server OS
+- **Caching Proxy:** Squid-Proxy
+- **Proxy Forwarding Layer:** Redsocks
+- **SOCKS Proxy:** Dante-SOCKS
+- **Encrypted Tunnel:** Shadowsocks
+- **Intrusion Protection:** Fail2Ban
+- **Client Communication:** Standard web client ➝ Proxy chain ➝ Public Internet
 
 ---
 
-## 🔧 System Architecture
+## 🔧 Updated System Architecture
 
-1. **Client connects to the proxy server** (hosted on Ubuntu)
-2. **Squid-Proxy** receives the request and checks its local **cache**
-3. If not cached, **Squid forwards** the request to **DANTE-SOCKS**
-4. **DANTE** encapsulates the request through a **SOCKS connection**
-5. **stunnel** wraps the communication in an **SSH tunnel**, encrypting it
-6. The request is securely transmitted to the public internet
+1. **Client** sends HTTP/HTTPS requests to the **Squid-Proxy**
+2. **Squid** checks for cached content; if not cached, it forwards the traffic
+3. **Redsocks** redirects Squid’s traffic to **Dante**, converting standard TCP to SOCKS
+4. **Dante-SOCKS** forwards the request through a local **Shadowsocks client**
+5. **Shadowsocks** encrypts and transmits the traffic to the remote Shadowsocks server
+6. **Fail2Ban** monitors unauthorized connection attempts and blocks malicious IPs
+
+> 🔁 The entire flow is now:  
+> **Client ➝ Squid ➝ Redsocks ➝ Dante ➝ Shadowsocks ➝ Internet**
 
 ---
 
 ## 📈 Design Decisions
 
-- **Squid-Proxy** for HTTP caching and proxying capabilities  
-- **DANTE-SOCKS** for handling SOCKS protocol connections  
-- **stunnel** for SSH tunneling, providing encryption over SOCKS  
-- Chose **Ubuntu** for ease of server management, community support, and stability
+- Replaced **stunnel** with **Shadowsocks** for a more modern, efficient encryption mechanism over SOCKS
+- Introduced **Redsocks** to bridge Squid’s HTTP traffic to SOCKS without modifying applications
+- Chose **Fail2Ban** to harden the proxy chain against brute-force and misuse
+- Continued using **Squid** for caching and ACLs to reduce bandwidth and improve response time
 
 ---
 
 ## 🧩 Challenges Faced
 
-- Understanding how Squid, DANTE, and stunnel interoperate
-- Configuring each service properly with correct port bindings, ACLs, and forwarding rules
-- Troubleshooting service chaining errors between proxy layers
-- Locating comprehensive, up-to-date documentation for integrating legacy and modern networking tools
+- Replacing `stunnel` with Shadowsocks required rethinking encryption and tunneling
+- Configuring **Redsocks** with proper redirection and firewall rules (iptables)
+- Debugging proxy failures in chained services due to port mismatches and buffer limits
+- Fine-tuning Fail2Ban filters for meaningful protection without false positives
 
 ---
 
 ## 📚 Lessons Learned
 
 ### 🧪 Technical Skills
-- Configuring and maintaining a proxy server on Linux
-- Handling advanced service chaining (Squid ➝ DANTE ➝ SSH)
-- Setting up encrypted SOCKS tunnels
-- Using Squid’s cache system to speed up repeated HTTP requests
+- Writing iptables and routing rules for proxy chaining
+- Translating between TCP/HTTP and SOCKS5 protocols
+- Managing Shadowsocks encryption and server configuration
+- Configuring Squid to work behind Redsocks with ACLs and caching policies
 
 ### 🌐 Networking Knowledge
-- Local Area Network (LAN) and Wireless LAN (WLAN) design principles  
-- The concept and mechanisms of **peer caching**
-- Access control and traffic routing at the application and transport layers
+- Secure proxy chaining and encapsulation across multiple transport layers
+- Trade-offs between encryption overhead and caching performance
+- Concepts of transparent proxying using `iptables` redirection
+- Defense in depth with proxy + encryption + rate limiting (Fail2Ban)
 
 ---
 
 ## 📸 Diagram
 
-The HTTP Request traverses the following path: client → Squid → DANTE → SSH tunnel → Internet
-
----
-
-## 🚀 Future Enhancements
-
-- Deploy service within a Docker container or VM for portability  
-- Add access logging and real-time monitoring dashboard  
-- Implement advanced ACLs to restrict specific traffic types  
-- Optimize caching policies for bandwidth-heavy environments  
-- Consider integrating TLS termination for HTTPS-aware caching  
+```txt
+Client
+  ↓
+Squid-Proxy (caching HTTP)
+  ↓
+Redsocks (redirect to SOCKS)
+  ↓
+Dante-SOCKS (SOCKS5 gateway)
+  ↓
+Shadowsocks (encryption tunnel)
+  ↓
+Internet
