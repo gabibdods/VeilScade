@@ -1,99 +1,209 @@
-# 🛡️ Encrypted SOCKS Proxy Server with Caching
+# Encrypted Proxy Chain
 
-A custom-configured proxy server built on Ubuntu Server OS using **Squid-Proxy**, **Redsocks**, **Dante-SOCKS**, **Shadowsocks**, and **Fail2Ban**. This layered architecture enables secure and accelerated HTTP requests through content caching, SOCKS protocol forwarding, encryption, and intrusion prevention.
+# Multi-Hop Anonymized Traffic Router with Shadowsocks, Dante, and Squid
 
----
+### Description
 
-## 🔍 Problem Statement
-
-In modern networks, latency and security are major concerns. I wanted to:
-- Reduce HTTP request latency by leveraging caching mechanisms
-- Ensure secure and private data transmission using encrypted tunneling
-- Gain deeper hands-on experience in server configuration and local network architecture
+- This project establishes a secure and private internet proxy chain using Squid, Dante (SOCKS5), and Shadowsocks.
+- It is deployed on an Ubuntu Server machine and integrates DNS management through Cloudflare Tunnel.
+- The system ensures encrypted, multi-hop routing of outbound traffic, enhancing privacy, bypassing censorship, and protecting client anonymity.
 
 ---
 
-## 🎯 Project Goals
+## NOTICE
 
-- Build a proxy server with both **caching** and **encryption**
-- Enable encrypted communication over the **SOCKS protocol**
-- Ensure seamless service integration between **Squid-Proxy**, **Dante-SOCKS**, and **Shadowsocks**
-- Understand how different layers of a secure network proxy system interconnect
-- Improve practical knowledge in **LAN/WLAN engineering and maintenance**
+- Please read through this `README.md` to better understand the project's source code and setup instructions.
+- Also, make sure to review the contents of the `License/` directory.
+- Your attention to these details is appreciated — enjoy exploring the project!
 
 ---
 
-## 🛠️ Technologies Used
+## Problem Statement
 
-- **OS:** Ubuntu Server OS
-- **Caching Proxy:** Squid-Proxy
-- **Proxy Forwarding Layer:** Redsocks
-- **SOCKS Proxy:** Dante-SOCKS
-- **Encrypted Tunnel:** Shadowsocks
-- **Intrusion Protection:** Fail2Ban
-- **Client Communication:** Standard web client ➝ Proxy chain ➝ Public Internet
+- Traditional VPNs and single-node proxies present trust and surveillance risks. This project solves that by building a self-hosted, chained proxy infrastructure where no single proxy sees both the origin and destination of traffic.
 
 ---
 
-## 🔧 Updated System Architecture
+## Project Goals
 
-1. **Client** sends HTTP/HTTPS requests to the **Squid-Proxy**
-2. **Squid** checks for cached content; if not cached, it forwards the traffic
-3. **Redsocks** redirects Squid’s traffic to **Dante**, converting standard TCP to SOCKS
-4. **Dante-SOCKS** forwards the request through a local **Shadowsocks client**
-5. **Shadowsocks** encrypts and transmits the traffic to the remote Shadowsocks server
-6. **Fail2Ban** monitors unauthorized connection attempts and blocks malicious IPs
+### Establish Squid as the entry-point HTTP proxy
 
-> 🔁 The entire flow is now:  
-> **Client ➝ Squid ➝ Redsocks ➝ Dante ➝ Shadowsocks ➝ Internet**
+- Squid listens on the local LAN and forwards outbound HTTP traffic to the next proxy hop while enforcing strict ACLs.
+
+### Configure Dante and Shadowsocks for encrypted, multi-hop routing
+
+- Dante relays traffic to a Shadowsocks server over encrypted tunnels, making the outbound proxy chain secure and censorship-resistant.
 
 ---
 
-## 📈 Design Decisions
+## Tools, Materials & Resources
 
-- Replaced **stunnel** with **Shadowsocks** for a more modern, efficient encryption mechanism over SOCKS
-- Introduced **Redsocks** to bridge Squid’s HTTP traffic to SOCKS without modifying applications
-- Chose **Fail2Ban** to harden the proxy chain against brute-force and misuse
-- Continued using **Squid** for caching and ACLs to reduce bandwidth and improve response time
+### Tool 1
 
----
+- Squid Proxy Server (HTTP filtering and access control)
 
-## 🧩 Challenges Faced
+### Tool 2
 
-- Replacing `stunnel` with Shadowsocks required rethinking encryption and tunneling
-- Configuring **Redsocks** with proper redirection and firewall rules (iptables)
-- Debugging proxy failures in chained services due to port mismatches and buffer limits
-- Fine-tuning Fail2Ban filters for meaningful protection without false positives
+- Dante Server (SOCKS5 support and forwarding)
 
----
+### Tool 3
 
-## 📚 Lessons Learned
+- Shadowsocks-libev (lightweight encrypted proxy protocol)
 
-### 🧪 Technical Skills
-- Writing iptables and routing rules for proxy chaining
-- Translating between TCP/HTTP and SOCKS5 protocols
-- Managing Shadowsocks encryption and server configuration
-- Configuring Squid to work behind Redsocks with ACLs and caching policies
+### Material 1
 
-### 🌐 Networking Knowledge
-- Secure proxy chaining and encapsulation across multiple transport layers
-- Trade-offs between encryption overhead and caching performance
-- Concepts of transparent proxying using `iptables` redirection
-- Defense in depth with proxy + encryption + rate limiting (Fail2Ban)
+- Ubuntu Server (Target OS for deployment)
+
+### Resource 1
+
+- Cloudflare Tunnel and DNS configuration for secure public exposure
 
 ---
 
-## 📸 Diagram
+## Design Decision
 
-```txt
-Client
-  ↓
-Squid-Proxy (caching HTTP)
-  ↓
-Redsocks (redirect to SOCKS)
-  ↓
-Dante-SOCKS (SOCKS5 gateway)
-  ↓
-Shadowsocks (encryption tunnel)
-  ↓
-Internet
+### Use Chained Proxy Architecture
+
+- Divides responsibilities among proxies, reducing data correlation risk at any single point.
+
+### Harden Squid with ACLs and Auth
+
+- Prevents unauthorized LAN clients from using the proxy entry point.
+
+### Encrypt Final Hop with Shadowsocks
+
+- Ensures exit node cannot trace traffic origin or monitor payloads.
+
+---
+
+## Features
+
+### Multi-Hop Proxy Chain
+
+- HTTP → SOCKS5 → Encrypted Shadowsocks with DNS resolution at exit node.
+
+### LAN Gateway
+
+- The Squid entry node allows clients on the LAN to safely route traffic.
+
+### Secure Cloud Exposure
+
+- Cloudflare Tunnel manages remote access while preserving encryption.
+
+---
+
+## Block Diagram
+
+### Example: 
+
+```plaintext
+          ┌──────────────┐
+          │  LAN Client  │
+          └──────┬───────┘
+                 ↓
+        ┌────────▼─────────┐
+        │     Squid        │
+        │(HTTP Proxy + ACL)│
+        └────────┬─────────┘
+                 ↓
+         ┌───────▼────────┐
+         │     Dante      │
+         │   (SOCKS5)     │
+         └───────┬────────┘
+                 ↓
+        ┌────────▼────────┐
+        │  Shadowsocks    │
+        │ (Encrypted Exit)│
+        └─────────────────┘
+```
+
+---
+
+## Functional Overview
+
+- Traffic enters through Squid, which enforces access policies.
+- Forwarded traffic passes through Dante (SOCKS5 relay).
+- Final hop encrypts and exits via Shadowsocks to public internet.
+
+---
+
+## Challenges & Solutions
+
+### Challenge 1
+
+- DNS leaks and IP exposure during transit — mitigated by configuring remote DNS resolution at Shadowsocks exit.
+
+### Challenge 2
+
+- Ensuring Squid and Dante remain isolated from public access — solved by LAN binding and firewall rules.
+
+---
+
+## Lessons Learned
+
+### Lesson for 1
+
+- Proxy chaining across protocols improves flexibility and security compared to monolithic solutions.
+
+### Lesson for 2
+
+- Fine-tuning ACLs and transparent proxy configs is critical for maintaining usability without sacrificing control.
+
+---
+
+## Project Structure
+
+```plaintext
+root/
+├── License/
+│   ├── LICENSE.md
+│   │
+│   └── NOTICE.md
+│
+├── .gitattributes
+│
+├── .gitignore
+│
+├── README.md
+│
+├── dante/
+│   ├── veilscade.alone.dante
+│   │
+│   ├── veilscade.dante
+│   │
+│   └── veilscade.dante.ex
+│
+├── fail2ban/
+│   ├── veilscade.fail2ban
+│   │
+│   └── veilscade.fail2ban.ex
+│
+├── gai/
+│   └── veilscade.gai.ex
+│
+├── redsocks/
+│   ├── veilscade.redsocks
+│   │
+│   └── veilscade.redsocks.ex
+│
+├── shadowsocks/
+│   ├── veilscade.config.shadowsocks
+│   │
+│   ├── veilscade.local.shadowsocks
+│   │
+│   └── veilscade.shadowsocks.ex
+│
+└── squid/
+    ├── veilscade.squid
+    │
+    └── veilscade.squid.ex
+
+```
+
+---
+
+## Future Enhancements
+
+- Add support for WireGuard VPN as an additional routing layer.
+- Implement monitoring dashboard for traffic and health checks.
+- Add auto-restart and containerization using Docker Compose.

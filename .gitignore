@@ -11,9 +11,27 @@
 
 # particular repository ignores:
 
-!*.dante
-!*.ex
-!*.fail2ban
-!*.redsocks
-!*.shadowsocks
-!*.squid
+!dante/
+!dante/veilscade.alone.dante
+!dante/veilscade.dante
+!dante/veilscade.dante.ex
+
+!fail2ban/
+!fail2ban/veilscade.fail2ban
+!fail2ban/veilscade.fail2ban.ex
+
+!gai/
+!gai/veilscade.gai.ex
+
+!redsocks/
+!redsocks/veilscade.redsocks
+!redsocks/veilscade.redsocks.ex
+
+!shadowsocks/
+!shadowsocks/veilscade.config.shadowsocks
+!shadowsocks/veilscade.local.shadowsocks
+!shadowsocks/veilscade.shadowsocks.ex
+
+!squid/
+!squid/veilscade.squid
+!squid/veilscade.squid.ex
