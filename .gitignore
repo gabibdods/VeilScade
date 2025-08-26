@@ -1,4 +1,4 @@
-# https://github.com/gabibdods/NewRepositoryTemplate:
+# https://github.com/gabibdods/NewRepo:
 *
 
 !.gitattributes
@@ -16,27 +16,6 @@
 
 # particular repository ignores:
 
-!dante/
-!dante/veilscade.alone.dante
-!dante/veilscade.dante
-!dante/veilscade.dante.ex
-
-!fail2ban/
-!fail2ban/veilscade.fail2ban
-!fail2ban/veilscade.fail2ban.ex
-
-!gai/
-!gai/veilscade.gai.ex
-
-!redsocks/
-!redsocks/veilscade.redsocks
-!redsocks/veilscade.redsocks.ex
-
-!shadowsocks/
-!shadowsocks/veilscade.config.shadowsocks
-!shadowsocks/veilscade.local.shadowsocks
-!shadowsocks/veilscade.shadowsocks.ex
-
-!squid/
-!squid/veilscade.squid
-!squid/veilscade.squid.ex
+!Dockerfile
+!docker-compose.yaml
+!*.conf

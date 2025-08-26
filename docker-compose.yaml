@@ -1,0 +1,12 @@
+services:
+  vsvps:
+    build: .
+    container_name: vsvpn
+    env_file: [.env]
+    expose: [1080, 3128, 443, 80]
+    restart: unless-stopped
+    networks: [gabibdods]
+
+networks:
+  gabibdods:
+    external: true
